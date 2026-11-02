@@ -104,6 +104,10 @@
   </section>
 
   <div id="app" hidden>
+    <div class="glass" id="demoBar" hidden style="padding:14px 18px;margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;border-color:rgba(255,179,71,.5)">
+      <span style="margin-right:auto;font-size:14px">👀 <b>Modo demostración:</b> datos de ejemplo para revisar la app. Nada de lo que cambies se guarda. Con el radar instalado, los datos reales se ven solo con la clave.</span>
+      <button class="btn btn-ghost" id="conClave"><i data-lucide="lock" class="icon"></i>Entrar con clave</button>
+    </div>
     <section class="hero">
       <span class="tag gob">Mercado Público · privado</span>
       <h1>Radar <span class="grad-text">SERROLEON</span></h1>
@@ -256,10 +260,62 @@
 
   let tok = store.get(KEY);
   let D = null, filtro = 'abiertas';
+  // Sin clave guardada se abre en modo demostración: datos de ejemplo, nada se envía ni se guarda
+  let demo = !tok;
 
-  function toast(t){ const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 2600); }
+  function toast(t){ const el = $('#toast'); el.textContent = demo ? t.replace(/^[✅🚀📝📄🗓★💵🧾]+\s*/u, '') + ' (demostración: no se guarda)' : t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 3200); }
+
+  // Datos de ejemplo del rubro (nombres tomados de compras reales de octubre 2026)
+  function datosDemo(){
+    const en = h => new Date(Date.now() + h * 36e5 - new Date().getTimezoneOffset() * 6e4).toISOString().slice(0, 16).replace('T', ' ');
+    const hace = d => new Date(Date.now() - d * 864e5).toISOString().slice(0, 10);
+    const ops = [
+      { c: '1259301-8-COT26', t: 'ca', n: 'Servicio de empavonado de vidrios oficinas de atención', o: 'Municipalidad de Renca', r: 'Región Metropolitana de Santiago', m: '$1.800.000', mn: 1800000, s: 9, cierre: en(30), ts: Date.now(), res: 'Empavonado con lámina de 42 m² de vidrios en oficinas de atención de público.', req: 'Visita a terreno opcional; instalación en 10 días.', ref: 'En 3 compras parecidas ganaron entre $1.250.000 y $1.900.000 neto.' },
+      { c: '4521-77-LE26', t: 'lic', n: 'CONVENIO DE SUMINISTRO DE GRÁFICA PUBLICITARIA Y SEÑALÉTICA', o: 'Servicio de Salud Metropolitano Sur', r: 'Región Metropolitana de Santiago', m: '100 a 1.000 UTM', mn: null, s: 9, cierre: en(190), ts: Date.now(), res: 'Convenio de 24 meses para pendones, gigantografías, vinilos y señalética.', req: 'Boleta de garantía de seriedad; experiencia con certificados.' },
+      { c: '2201-15-COT26', t: 'ca', n: 'ELABORACIÓN E INSTALACIÓN DE GRÁFICA ADHESIVA PARA PISO', o: 'Metro Regional', r: 'Región Metropolitana de Santiago', m: '$950.000', mn: 950000, s: 8, cierre: en(52), ts: Date.now(), res: 'Vinilo de piso antideslizante con señalización de circulación.' },
+      { c: '3317-40-LE26', t: 'lic', n: 'SERVICIO DE PINTURA EXTERIOR SEG PROVIDENCIA', o: 'Municipalidad de Providencia', r: 'Región Metropolitana de Santiago', m: '$14.500.000', mn: 14500000, s: 8, cierre: en(140), ts: Date.now(), res: 'Pintura de fachadas y rejas de 3 recintos municipales.', req: 'Visita a terreno obligatoria.' },
+      { c: '1188-22-COT26', t: 'ca', n: 'SUMINISTRO DE ROLLERS GIGANTOGRAFÍAS Y OTROS PARA CAMPAÑAS DE SALUD', o: 'SEREMI de Salud', r: 'Región de Valparaíso', m: '$2.300.000', mn: 2300000, s: 7, cierre: en(70), ts: Date.now() },
+    ];
+    const hist = [
+      { c: 'h1-COT26', n: 'Empavonado de vidrios sala de reuniones', o: 'Universidad de Santiago', r: 'Región Metropolitana de Santiago', f: hace(12), g: 'GRÁFICA INTEGRAL SPA', gn: 1250000, k: 6, min: 1250000, max: 2100000, d: 2000000 },
+      { c: 'h2-COT26', n: 'Impresión de pendones roller institucionales', o: 'Municipalidad de Maipú', r: 'Región Metropolitana de Santiago', f: hace(20), g: 'IMPRESOS DEL SUR LTDA', gn: 540000, k: 9, min: 540000, max: 880000, d: 900000 },
+      { c: 'h3-COT26', n: 'Servicio de pintura interior oficinas', o: 'Fonasa', r: 'Región Metropolitana de Santiago', f: hace(31), g: 'PINTURAS RS SPA', gn: 2380000, k: 4, min: 2380000, max: 3100000, d: 3500000 },
+      { c: 'h4-COT26', n: 'Letreros y señalética de vinilo', o: 'Hospital El Pino', r: 'Región Metropolitana de Santiago', f: hace(40), g: 'GRÁFICA INTEGRAL SPA', gn: 1900000, k: 5, min: 1900000, max: 2600000, d: 2500000 },
+    ];
+    return {
+      ops, hist, seguidas: [{ codigo: ops[0].c, nombre: ops[0].n, cierre: ops[0].cierre }],
+      perfil: { presentacion: 'SERROLEON, empresa de publicidad gráfica, impresión, empavonado de vidrios y pintura.', representante: '', experiencia: '', clientes: '', equipo: '', equipamiento: '', tarifas: '', cobertura: 'Región Metropolitana.', contacto: '', direccion: '', telefono: '', correo: '' },
+      campos: { presentacion: 'Presentación', representante: 'Representante', experiencia: 'Experiencia y trabajos realizados', clientes: 'Clientes', equipo: 'Equipo humano', equipamiento: 'Equipamiento técnico', tarifas: 'Tarifas base (netas)', cobertura: 'Cobertura geográfica', contacto: 'Contacto', direccion: 'Dirección comercial', telefono: 'Teléfono', correo: 'Correo para ofertas' },
+      prefs: { regiones: ['Metropolitana'], montoMin: 300000, excluir: '' },
+      paqs: [
+        { codigo: 'p1-COT26', nombre: 'Vinilos esmerilados para mamparas', organismo: 'Servicio de Impuestos Internos', estado: 'postulado', sugerido: 980000, miNeto: 950000, cierre: en(-20), fecha: hace(2) },
+        { codigo: 'p2-COT26', nombre: 'Impresión de afiches campaña invierno', organismo: 'Municipalidad de La Florida', estado: 'perdida', miNeto: 620000, ganador: 'IMPRESOS DEL SUR LTDA', montoGanador: 540000, ofertas: 7, cierre: en(-200), fecha: hace(15) },
+      ],
+      stats: { postuladas: 2, ganadas: 0, perdidas: 1, pendientes: 1, tasa: 0, montoGanado: 0, difPromedio: 0.15 },
+      mercado: { competidores: [{ nombre: 'GRÁFICA INTEGRAL SPA', n: 2, mediana: 1250000 }, { nombre: 'IMPRESOS DEL SUR LTDA', n: 1, mediana: 540000 }, { nombre: 'PINTURAS RS SPA', n: 1, mediana: 2380000 }], clientes: [{ nombre: 'Municipalidad de Maipú', n: 1, mediana: 540000 }, { nombre: 'Hospital El Pino', n: 1, mediana: 1900000 }] },
+      ocs: [], docs: [
+        { id: 'registro', nombre: 'Acreditación Registro de Proveedores (ChileProveedores)', vence: '', listo: false },
+        { id: 'f301', nombre: 'Certificado F30-1 de cumplimiento laboral y previsional', vence: '', listo: false },
+        { id: 'vigencia', nombre: 'Certificado de vigencia de la sociedad', vence: '', listo: false },
+        { id: 'carta', nombre: 'Carta de transferencia con datos bancarios (no vence)', vence: '', listo: false },
+      ],
+      clientes: [{ organismo: 'Municipalidad de Renca', region: 'Región Metropolitana de Santiago', compras: 3, mediana: 1400000, contactos: [{ nombre: 'Encargada de Compras', rol: 'Comprador' }] }],
+      vitrina: {}, canal: null, proveedorInscrito: false,
+      temporadas: [{ nombre: 'Pintura y mantención de colegios en vacaciones', fecha: new Date().getFullYear() + 1 + '-01-10', faltan: 70, anticipo: 50, que: 'pintura de salas y fachadas, demarcación y señalética de establecimientos educacionales' }],
+      meta: {}, red: [{ nombre: 'Juan Pérez', rol: 'Instalador de vinilos', region: 'RM', contacto: '', tarifa: '$45.000 por día', notas: '' }],
+      renta: { proyectos: [] }, salud: { limite: 1000, uso: [], errores: [] }, otrasFuentes: [],
+      experiencia: [{ id: 'e1', servicio: 'Empavonado de vidrios oficinas', fecha: '2025-08-12', cliente: 'Municipalidad X', rutCliente: '', factura: '1234', firmante: '', cargo: '', contacto: '', certificado: false }],
+      arriendos: [{ item: 'Andamio', costoDia: 15000, palabras: 'andamio, altura, fachada' }, { item: 'Alza hombre / camión pluma', costoDia: 120000, palabras: 'alza hombre, camion pluma, altura, letrero' }],
+      top: ops.slice(0, 3).map((o, i) => ({ ...o, motivos: [i === 0 ? 'en tu región' : 'en tu región', o.t === 'ca' ? 'Compra Ágil: menos papeleo' : 'licitación', `presupuesto ${o.m}`] })),
+    };
+  }
 
   async function call(path, method = 'GET', body){
+    if (demo) {
+      if (path === '/panel') return datosDemo();
+      const b = body || {};
+      return { ok: true, prefs: b, docs: b.docs, red: b.red, vitrina: b, arriendos: b.arriendos, experiencia: (b.experiencia || []).map((e, i) => ({ id: e.id || 'e' + i, ...e })) };
+    }
     const r = await fetch(API + path, { method, headers: { Authorization: 'Bearer ' + tok, ...(body ? { 'Content-Type': 'application/json' } : {}) }, body: body ? JSON.stringify(body) : undefined });
     if (r.status === 401) { store.set(KEY, null); tok = null; throw new Error('clave'); }
     if (!r.ok) throw new Error('red');
@@ -655,7 +711,7 @@
   }
 
   /* Eventos */
-  $('#entrar').addEventListener('click', () => { tok = $('#tok').value.trim(); if (!tok) return; store.set(KEY, tok); cargar(); });
+  $('#entrar').addEventListener('click', () => { tok = $('#tok').value.trim(); if (!tok) return; demo = false; $('#demoBar').hidden = true; store.set(KEY, tok); cargar(); });
   $('#tok').addEventListener('keydown', e => { if (e.key === 'Enter') $('#entrar').click(); });
   $('#salir').addEventListener('click', e => { e.preventDefault(); store.set(KEY, null); tok = null; location.reload(); });
   $('#tabs').addEventListener('click', e => {
@@ -762,7 +818,9 @@
     catch { toast('No se pudo guardar. Revisa tu conexión.'); }
   });
 
-  if (tok) cargar(); else { $('#gate').hidden = false; icons(); }
+  $('#conClave').addEventListener('click', () => { demo = false; $('#demoBar').hidden = true; $('#app').hidden = true; $('#gate').hidden = false; icons(); });
+  if (demo) $('#demoBar').hidden = false;
+  cargar();
 })();
 </script>
 </body>
